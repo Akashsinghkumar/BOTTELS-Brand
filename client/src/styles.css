@@ -1,0 +1,592 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+    --aq-primary: #00bcd4;
+    --aq-primary-hover: #00acc1;
+    --aq-secondary: #8bc34a;
+    --aq-secondary-hover: #7cb342;
+    --aq-green: #8bc34a;
+    --aq-text: #333333;
+    --aq-muted: #64748b;
+    --aq-bg: #f9fbfd;
+    --aq-border: #e2e8f0;
+    --aq-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Roboto', sans-serif;
+    background-color: var(--aq-bg);
+    color: var(--aq-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Header Navbar */
+.aq-header {
+    background-color: var(--aq-primary);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.aq-header-container {
+    max-width: 1248px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.aq-logo-box {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    line-height: 1.1;
+}
+
+.aq-logo-title {
+    color: white;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.aq-logo-sub {
+    color: #e0f7fa;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.aq-search-bar {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 30px;
+    position: relative;
+}
+
+.aq-search-input {
+    width: 100%;
+    height: 38px;
+    padding: 0 16px 0 40px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.9rem;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.aq-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 11px;
+    color: var(--aq-muted);
+}
+
+/* Login Header Button */
+.aq-login-btn {
+    background-color: white;
+    color: var(--aq-primary);
+    font-weight: 700;
+    border: none;
+    padding: 6px 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: background-color 0.15s ease;
+}
+
+.aq-login-btn:hover {
+    background-color: #f1fafb;
+}
+
+.aq-nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.aq-nav-link:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Categories Sub-bar */
+.aq-categories-bar {
+    background-color: white;
+    box-shadow: var(--aq-card-shadow);
+    padding: 14px 24px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--aq-border);
+}
+
+.aq-categories-container {
+    max-width: 1248px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.aq-cat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--aq-text);
+    font-weight: 600;
+    font-size: 0.85rem;
+    gap: 6px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.aq-cat-item:hover {
+    color: var(--aq-primary);
+}
+
+.aq-cat-icon {
+    font-size: 1.8rem;
+}
+
+/* Rotating Banner Ads */
+.aq-banner {
+    max-width: 1248px;
+    margin: 0 auto 20px;
+    height: 200px;
+    background: linear-gradient(135deg, var(--aq-primary-hover) 0%, var(--aq-primary) 100%);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--aq-card-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    color: white;
+}
+
+/* Product Cards Grid */
+.aq-container {
+    max-width: 1248px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.aq-grid-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: white;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--aq-border);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.aq-grid-box {
+    background: white;
+    padding: 20px;
+    border-radius: 0 0 8px 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: var(--aq-card-shadow);
+}
+
+.aq-product-card {
+    border: 1px solid var(--aq-border);
+    padding: 12px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--aq-text);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.aq-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+}
+
+.aq-img-wrap {
+    height: 150px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 2.2rem;
+}
+
+.aq-prod-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* Star Rating Badge */
+.aq-rating-badge {
+    background-color: var(--aq-green);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    width: fit-content;
+    margin-bottom: 8px;
+}
+
+.aq-assured-tag {
+    display:none !important;
+}
+
+.aq-price-row {
+    margin: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.aq-price-current {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.aq-price-original {
+    font-size: 0.85rem;
+    color: var(--aq-muted);
+    text-decoration: line-through;
+}
+
+.aq-price-discount {
+    color: var(--aq-green);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Split-Panel Authentication Modal */
+.aq-auth-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.aq-auth-modal {
+    width: 650px;
+    height: 480px;
+    background-color: white;
+    border-radius: 8px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.aq-auth-left {
+    width: 40%;
+    background-color: var(--aq-primary);
+    padding: 40px 24px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.aq-auth-left-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.aq-auth-left-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+.aq-auth-right {
+    width: 60%;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.aq-form-group {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.aq-form-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--aq-border);
+    padding: 8px 0;
+    font-size: 0.95rem;
+    outline: none;
+    background: transparent;
+    transition: border-bottom-color 0.15s ease;
+}
+
+.aq-form-input:focus {
+    border-bottom-color: var(--aq-primary);
+}
+
+.aq-btn-orange {
+    width: 100%;
+    background-color: var(--aq-secondary);
+    color: white;
+    border: none;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(251, 100, 27, 0.2);
+    transition: background-color 0.15s ease;
+}
+
+.aq-btn-orange:hover {
+    background-color: var(--aq-secondary-hover);
+}
+
+.aq-btn-white {
+    width: 100%;
+    background-color: white;
+    color: var(--aq-primary);
+    border: 1px solid var(--aq-border);
+    padding: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.aq-btn-white:hover {
+    background-color: #f8fafc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* 4-Step Accordion Checkout */
+.aq-accordion {
+    margin-bottom: 12px;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: var(--aq-card-shadow);
+    border: 1px solid var(--aq-border);
+    overflow: hidden;
+}
+
+.aq-accordion-header {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-bottom: 1px solid var(--aq-border);
+}
+
+.aq-accordion-header.active {
+    background-color: var(--aq-primary);
+    color: white;
+}
+
+.aq-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    color: var(--aq-primary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+}
+
+.aq-accordion-header.active .aq-step-num {
+    background: white;
+    color: var(--aq-primary);
+}
+
+.aq-step-title {
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.aq-accordion-body {
+    padding: 24px;
+    background-color: white;
+}
+
+/* Billing card */
+.aq-split-checkout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 992px) {
+    .aq-split-checkout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.aq-price-details-card {
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: var(--aq-card-shadow);
+    border: 1px solid var(--aq-border);
+    padding: 20px;
+    height: fit-content;
+}
+
+.aq-price-title {
+    color: var(--aq-muted);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--aq-border);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+}
+
+.aq-price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+}
+
+.aq-price-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 1.15rem;
+    border-top: 1px dashed var(--aq-border);
+    border-bottom: 1px dashed var(--aq-border);
+    padding: 16px 0;
+    margin: 16px 0;
+}
+
+.aq-price-savings {
+    color: var(--aq-green);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Dropdown */
+.aq-dropdown-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.aq-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    border: 1px solid var(--aq-border);
+    z-index: 1050;
+    overflow: hidden;
+}
+
+.aq-dropdown-wrap:hover .aq-dropdown-content {
+    display: block;
+}
+
+.aq-dropdown-item {
+    color: var(--aq-text);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--aq-border);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.aq-dropdown-item:hover {
+    background-color: #f1f5f9;
+    color: var(--aq-primary);
+}
+
+/* Other helpers */
+.aq-track-container {
+    padding: 24px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--aq-border);
+    box-shadow: var(--aq-card-shadow);
+}
+
+.aq-invoice-btn {
+    background-color: var(--aq-primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.aq-invoice-btn:hover {
+    background-color: var(--aq-primary-hover);
+}

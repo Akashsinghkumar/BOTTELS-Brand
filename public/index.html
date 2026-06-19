@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUAVIORA | Pure Water. Your Brand.</title>
+    <meta name="description"
+        content="Premium private-label packaged drinking water for restaurants, hotels, and events.">
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container top-bar-content">
+            <div class="location-select">
+                <select>
+                    <option>Select City</option>
+                    <option>New Delhi</option>
+                    <option>Mumbai</option>
+                    <option>Bangalore</option>
+                </select>
+                <button class="go-btn">GO</button>
+            </div>
+            <div class="contact-info">
+                <span><i class="fas fa-phone-alt"></i> 1800 121 1007</span>
+                <span><i class="fas fa-envelope"></i> wecare@aquaviora.co.in</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="#">AQUAVIORA</a>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#about">Greener Promise <i class="fas fa-chevron-down"></i></a></li>
+                    <li><a href="#products">Shop Products</a></li>
+                    <li><a href="#brands">Brands <i class="fas fa-chevron-down"></i></a></li>
+                    <li><a href="#news">News Room <i class="fas fa-chevron-down"></i></a></li>
+                    <li><a href="#mrp">Revised MRP</a></li>
+                    <li><a href="#uae">UAE</a></li>
+                </ul>
+                <div class="nav-icons">
+                    <a href="#"><i class="fas fa-search"></i></a>
+                    <a href="#"><i class="fas fa-user"></i></a>
+                    <a href="#order"><i class="fas fa-shopping-cart"></i> <span id="cartCount" class="badge">0</span></a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-container">
+            <div class="hero-content text-center">
+                <h1 class="bisleri-title">AQUAVIORA</h1>
+                <h2 class="tagline">#DRINKITUP</h2>
+
+                <div class="cta-buttons">
+                    <a href="#products" class="btn btn-hero">Shop Now</a>
+                </div>
+            </div>
+
+            <div class="hero-image-wrapper">
+                <!-- Main Bottle Image Placeholder - Replace with actual bottle image -->
+                <div class="bottle-mockup">
+                    <div class="bottle-body">
+                        <div class="bottle-label">AQUAVIORA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>About Us</h2>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <p>Private label water is more than just hydration—it's a branding statement. At AQUAVIORA, we provide
+                    7-stage purified water in premium packaging that carries <strong>your brand's identity</strong>.</p>
+                <br>
+                <p>Start serving your own branded water in your hotel, restaurant, or office with full compliance (BIS,
+                    FSSAI) and hygiene assurance.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="features">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Why Choose AQUAVIORA?</h2>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-tint feature-icon"></i>
+                    <h3>7-Stage Purification</h3>
+                    <p>RO + UV + Ozone treated for absolute purity.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-certificate feature-icon"></i>
+                    <h3>Certified Quality</h3>
+                    <p>BIS & FSSAI compliant manufacturing.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-paint-brush feature-icon"></i>
+                    <h3>Custom Branding</h3>
+                    <p>Professional label design for your brand.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-truck feature-icon"></i>
+                    <h3>Reliable Delivery</h3>
+                    <p>On-time bulk supply for events & businesses.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Our Products</h2>
+            </div>
+            <div class="product-grid">
+                <!-- 250ml -->
+                <div class="product-card" data-id="250ml">
+                    <div
+                        style="height: 150px; background: #e0f7fa; margin-bottom: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #008ba3; font-weight: bold;">
+                        250 ML Bottle</div>
+                    <h3 class="product-title">250ml Mini</h3>
+                    <p>Perfect for Events & Conferences</p>
+                    <button class="btn btn-outline" onclick="addToCart('250ml')">Add to Cart</button>
+                </div>
+                <!-- 500ml -->
+                <div class="product-card" data-id="500ml">
+                    <div
+                        style="height: 150px; background: #e0f7fa; margin-bottom: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #008ba3; font-weight: bold;">
+                        500 ML Bottle</div>
+                    <h3 class="product-title">500ml Standard</h3>
+                    <p>Ideal for Restaurants & Cafes</p>
+                    <button class="btn btn-outline" onclick="addToCart('500ml')">Add to Cart</button>
+                </div>
+                <!-- 600ml -->
+                <div class="product-card" data-id="600ml">
+                    <div
+                        style="height: 150px; background: #e0f7fa; margin-bottom: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #008ba3; font-weight: bold;">
+                        600 ML Bottle</div>
+                    <h3 class="product-title">600ml Premium</h3>
+                    <p>For Events & Meetings</p>
+                    <button class="btn btn-outline" onclick="addToCart('600ml')">Add to Cart</button>
+                </div>
+                <!-- 1 Litre -->
+                <div class="product-card" data-id="1L">
+                    <div
+                        style="height: 150px; background: #e0f7fa; margin-bottom: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #008ba3; font-weight: bold;">
+                        1 Litre Bottle</div>
+                    <h3 class="product-title">1 Litre Premium</h3>
+                    <p>For Fine Dining & Hotels</p>
+                    <button class="btn btn-outline" onclick="addToCart('1L')">Add to Cart</button>
+                </div>
+                <!-- 20 Litre -->
+                <div class="product-card" data-id="20L">
+                    <div
+                        style="height: 150px; background: #e0f7fa; margin-bottom: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #008ba3; font-weight: bold;">
+                        20 Litre Jar</div>
+                    <h3 class="product-title">20 Litre Jar</h3>
+                    <p>Corporate Offices & Bulk Use</p>
+                    <button class="btn btn-outline" onclick="addToCart('20L')">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing & Packaging Section -->
+    <section id="pricing" class="pricing-section">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Pricing & Packaging</h2>
+            </div>
+
+            <!-- Pricing Table -->
+            <div class="pricing-table-container">
+                <table class="pricing-table">
+                    <thead>
+                        <tr>
+                            <th>Bottle Size</th>
+                            <th>MRP / Bottle</th>
+                            <th>1 Peti Price</th>
+                            <th>Bulk Price (10+ Peti)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>250 ml</td>
+                            <td>₹10</td>
+                            <td>₹240 – ₹280</td>
+                            <td>₹4.5 – ₹5.5 / bottle</td>
+                        </tr>
+                        <tr>
+                            <td>500 ml</td>
+                            <td>₹20</td>
+                            <td>₹180 – ₹220</td>
+                            <td>₹6 – ₹7.5 / bottle</td>
+                        </tr>
+                        <tr>
+                            <td>600 ml</td>
+                            <td>₹22</td>
+                            <td>₹200 – ₹240</td>
+                            <td>₹7 – ₹8.5 / bottle</td>
+                        </tr>
+                        <tr>
+                            <td>1 Litre</td>
+                            <td>₹25–30</td>
+                            <td>₹170 – ₹210</td>
+                            <td>₹10 – ₹12 / bottle</td>
+                        </tr>
+                        <tr>
+                            <td>20 Litre</td>
+                            <td>₹25–30</td>
+                            <td>₹30 (One Day)</td>
+                            <td>₹25 (Daily)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Packaging Details -->
+            <div class="packaging-details">
+                <h3 class="text-center" style="margin-bottom: 30px;">Packaging Details (Bottles per Peti)</h3>
+                <div class="packaging-grid">
+                    <div class="pack-card">
+                        <h4>250 ml</h4>
+                        <p>40 Bottles / Peti</p>
+                    </div>
+                    <div class="pack-card">
+                        <h4>500 ml</h4>
+                        <p>25 Bottles / Peti</p>
+                    </div>
+                    <div class="pack-card">
+                        <h4>600 ml</h4>
+                        <p>20 Bottles / Peti</p>
+                    </div>
+                    <div class="pack-card">
+                        <h4>1 Litre</h4>
+                        <p>12 Bottles / Peti</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Private Label Process -->
+    <section id="private-label" class="process">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Private Label Process</h2>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <div>
+                        <h3>Share Brand Details</h3>
+                        <p>Send us your brand name, logo, and color preferences.</p>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <div>
+                        <h3>Select Bottle & Quantity</h3>
+                        <p>Choose the size (250ml/500ml/1L) and order quantity.</p>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <div>
+                        <h3>Design & Print</h3>
+                        <p>We print professional, waterproof labels with your branding.</p>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">04</div>
+                    <div>
+                        <h3>Delivery</h3>
+                        <p>Freshly packed water delivered to your doorstep.</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="https://wa.me/917739339852?text=I%20need%20a%20private%20label%20quote" target="_blank"
+                        class="btn btn-primary">Get Private Label Quote</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Section -->
+    <section id="order" class="forms-section">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Place An Order</h2>
+            </div>
+            <div class="form-container">
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="orderName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="orderPhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Bottle Size</label>
+                        <select id="orderSize" class="form-control">
+                            <option value="250ml">250 ml</option>
+                            <option value="500ml">500 ml</option>
+                            <option value="600ml">600 ml</option>
+                            <option value="1L">1 Litre</option>
+                            <option value="20L">20 Litre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="orderQty" class="form-control" min="10" value="50" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Delivery Location</label>
+                        <input type="text" id="orderLoc" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Order Type</label>
+                        <select id="orderType" class="form-control">
+                            <option value="Normal">Normal (AQUAVIORA Brand)</option>
+                            <option value="Private Label">Private Label (My Brand)</option>
+                        </select>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Place Order on WhatsApp</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enquiry Section -->
+    <section id="enquiry" class="forms-section" style="background: #f9fbfd;">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Quick Enquiry</h2>
+            </div>
+            <div class="form-container">
+                <form id="enquiryForm">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="enqName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="enqPhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Enquiry Type</label>
+                        <select id="enqType" class="form-control">
+                            <option value="Bulk Order">Bulk Order</option>
+                            <option value="Private Label">Private Label</option>
+                            <option value="Distributorship">Distributorship</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="enqMsg" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-outline">Send Enquiry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials" style="padding: 80px 0; background: white;">
+        <div class="container">
+            <div class="text-center section-title">
+                <h2>Trusted By</h2>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <p style="font-style: italic;">"The custom branding on the 500ml bottles added a premium touch to
+                        our restaurant. Customers love it!"</p>
+                    <h4 style="margin-top: 15px;">- Rajesh Kumar, The Spice Route</h4>
+                </div>
+                <div class="feature-card">
+                    <p style="font-style: italic;">"Excellent service for our corporate event. Punctual delivery and
+                        great water quality."</p>
+                    <h4 style="margin-top: 15px;">- Priya Sharma, EventPlanner Co.</h4>
+                </div>
+                <div class="feature-card">
+                    <p style="font-style: italic;">"We switched to AQUAVIORA for our office supply. The jars are clean
+                        and delivery is consistent."</p>
+                    <h4 style="margin-top: 15px;">- Amit Verma, TechSolutions</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" style="padding: 80px 0; background: #222; color: white;">
+        <div class="container">
+            <div class="text-center">
+                <h2 style="margin-bottom: 30px;">Contact Us</h2>
+                <div style="font-size: 1.2rem; margin-bottom: 30px;">
+                    <p><i class="fas fa-phone"></i> +91 77393 39852</p>
+                    <p><i class="fas fa-envelope"></i> contact@aquaviora.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Industrial Area, Phase 2, New Delhi, India</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="copyright">
+                &copy; 2026 AQUAVIORA. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/917739339852" class="floating-whatsapp" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>
