@@ -152,6 +152,7 @@ export default function App() {
     const [auditLogs, setAuditLogs] = useState([]);
     const [activeTicket, setActiveTicket] = useState(null);
     const [chatInput, setChatInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
     const [trackingOrder, setTrackingOrder] = useState(null);
     const [activeRouteWaypoints, setActiveRouteWaypoints] = useState([]);
 
@@ -545,21 +546,43 @@ export default function App() {
         } catch (e) {}
     };
 
-    const sendHelpMessage = async (sender) => {
-        if (!chatInput.trim() || !activeTicket) return;
+    const sendHelpMessage = async (sender, customText = '') => {
+        const messageText = customText || chatInput;
+        if (!messageText.trim() || !activeTicket) return;
+        if (!customText) setChatInput('');
+
+        // If sent by customer, simulate typing indicator
+        if (sender === 'customer') {
+            const tempMessages = [
+                ...activeTicket.messages,
+                { sender: 'customer', text: messageText, timestamp: new Date().toISOString() }
+            ];
+            setActiveTicket({ ...activeTicket, messages: tempMessages });
+            setIsTyping(true);
+        }
+
         try {
             const res = await fetch(`/api/support/tickets/${activeTicket._id}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sender, text: chatInput })
+                body: JSON.stringify({ sender, text: messageText })
             });
             const data = await res.json();
             if (data.success) {
-                setActiveTicket({ ...activeTicket, messages: data.messages });
-                setChatInput('');
+                if (sender === 'customer') {
+                    setTimeout(() => {
+                        setActiveTicket({ ...activeTicket, messages: data.messages });
+                        setIsTyping(false);
+                    }, 1000);
+                } else {
+                    setActiveTicket({ ...activeTicket, messages: data.messages });
+                    setIsTyping(false);
+                }
                 fetchData();
             }
-        } catch (e) {}
+        } catch (e) {
+            setIsTyping(false);
+        }
     };
 
     // Return order
@@ -1022,22 +1045,97 @@ export default function App() {
 
                     {/* Support ticket chat */}
                     {custView === 'support' && activeTicket && (
-                        <div className="aq-price-details-card">
-                            <h3>Help Center Support Chat</h3>
-                            <div className="chat-window" style={{ marginTop: 14 }}>
-                                <div className="chat-messages">
-                                    {activeTicket.messages.map((m, i) => (
-                                        <div key={i} className={`chat-bubble ${m.sender}`}>
-                                            <strong>{m.sender.toUpperCase()}:</strong>
-                                            <div>{m.text}</div>
-                                            <div className="chat-time">{new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div className="aq-chat-card">
+                            {/* Chat Header */}
+                            <div className="aq-chat-header">
+                                <div className="aq-chat-header-info">
+                                    <div className={`aq-chat-avatar ${isTyping ? 'pulse' : ''}`}>
+                                        <i className="fas fa-tint" style={{ color: 'white' }}></i>
+                                    </div>
+                                    <div>
+                                        <div className="aq-chat-header-title">AQUAVIORA Support</div>
+                                        <div className="aq-chat-header-status">
+                                            <span className="aq-status-dot"></span> Online now
                                         </div>
-                                    ))}
+                                    </div>
                                 </div>
-                                <div className="chat-input-bar">
-                                    <input className="form-input" style={{ marginBottom: 0 }} placeholder="Ask AI bot or support agent..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key==='Enter' && sendHelpMessage('customer')} />
-                                    <button className="btn btn-primary" onClick={() => sendHelpMessage('customer')}>Send</button>
+                                <div className="aq-chat-header-actions">
+                                    <button className="aq-chat-close-btn" onClick={() => setCustView('orders')} title="Minimize chat">
+                                        <i className="fas fa-minus"></i>
+                                    </button>
+                                    <button className="aq-chat-close-btn" onClick={() => setCustView('home')} title="Close chat">
+                                        <i className="fas fa-times"></i>
+                                    </button>
                                 </div>
+                            </div>
+
+                            {/* Chat Messages */}
+                            <div className="aq-chat-messages">
+                                {activeTicket.messages.map((m, i) => {
+                                    const isBot = m.sender === 'bot' || m.sender === 'support';
+                                    return (
+                                        <div key={i} className={`aq-chat-row ${isBot ? 'bot' : 'customer'}`}>
+                                            <div className={`aq-msg-avatar ${isBot ? 'bot-avatar' : ''}`}>
+                                                {isBot ? <i className="fas fa-robot"></i> : user?.username?.substring(0, 2).toUpperCase() || 'US'}
+                                            </div>
+                                            <div className="aq-msg-bubble">
+                                                <div>{m.text}</div>
+                                                <span className="aq-msg-time">
+                                                    {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Typing Indicator */}
+                                {isTyping && (
+                                    <div className="aq-chat-row bot">
+                                        <div className="aq-msg-avatar bot-avatar">
+                                            <i className="fas fa-robot"></i>
+                                        </div>
+                                        <div className="aq-typing-bubble">
+                                            <span className="aq-typing-dot"></span>
+                                            <span className="aq-typing-dot"></span>
+                                            <span className="aq-typing-dot"></span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Quick Replies Suggestions */}
+                            {!isTyping && activeTicket.messages.length > 0 && 
+                             (activeTicket.messages[activeTicket.messages.length - 1].sender === 'bot') && (
+                                <div className="aq-quick-replies">
+                                    <button className="aq-quick-reply-btn" onClick={() => sendHelpMessage('customer', 'Track Order')}>
+                                        Track Order
+                                    </button>
+                                    <button className="aq-quick-reply-btn" onClick={() => sendHelpMessage('customer', 'Private Label Quote')}>
+                                        Private Label Quote
+                                    </button>
+                                    <button className="aq-quick-reply-btn" onClick={() => sendHelpMessage('customer', 'Talk to Agent')}>
+                                        Talk to Agent
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Chat Input Bar */}
+                            <div className="aq-chat-input-container">
+                                <div className="aq-chat-input-pill">
+                                    <button className="aq-chat-attach-btn" onClick={() => toast.info('File attachments coming soon!')} title="Attach file">
+                                        <i className="fas fa-paperclip"></i>
+                                    </button>
+                                    <input 
+                                        className="aq-chat-input-field" 
+                                        placeholder="Type your message..." 
+                                        value={chatInput} 
+                                        onChange={(e) => setChatInput(e.target.value)} 
+                                        onKeyDown={(e) => e.key === 'Enter' && sendHelpMessage('customer')} 
+                                    />
+                                </div>
+                                <button className="aq-chat-send-btn" onClick={() => sendHelpMessage('customer')} title="Send message">
+                                    <i className="fas fa-paper-plane"></i>
+                                </button>
                             </div>
                         </div>
                     )}
