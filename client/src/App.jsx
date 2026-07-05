@@ -1301,7 +1301,8 @@ export default function App() {
                                         <div style={{ background: '#f8fafc', border: '1px solid var(--aq-border)', borderRadius: 12, padding: 14, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                                             <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--aq-muted)', borderBottom: '1px solid var(--aq-border)', paddingBottom: 8 }}>Conversations</h4>
                                             {tickets.map(t => {
-                                                const isWaiting = t.status === 'Open';
+                                                const isWaiting = t.status === 'Waiting';
+                                                const isOpen = t.status === 'Open';
                                                 const isSelf = activeTicket?._id === t._id;
                                                 return (
                                                     <div 
@@ -1321,13 +1322,13 @@ export default function App() {
                                                             <strong style={{ fontSize: '0.9rem' }}>{t.customerName}</strong>
                                                             <span style={{ 
                                                                 fontSize: '0.65rem', 
-                                                                padding: '2px 6px', 
+                                                                padding: '2px 8px', 
                                                                 borderRadius: 12, 
                                                                 fontWeight: 700, 
-                                                                background: isWaiting ? '#ffe0b2' : '#c8e6c9', 
-                                                                color: isWaiting ? '#e65100' : '#2e7d32' 
+                                                                background: isWaiting ? '#ffebee' : isOpen ? '#fff8e1' : '#e8f5e9', 
+                                                                color: isWaiting ? '#c62828' : isOpen ? '#b7791f' : '#2e7d32' 
                                                             }}>
-                                                                {isWaiting ? 'Waiting' : 'Resolved'}
+                                                                {isWaiting ? 'Waiting' : isOpen ? 'Bot Active' : 'Resolved'}
                                                             </span>
                                                         </div>
                                                         <div style={{ fontSize: '0.7rem', color: 'var(--aq-muted)' }}>Ticket ID: {t._id.substring(0, 8)}...</div>
