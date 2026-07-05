@@ -589,29 +589,6 @@ export default function App() {
         return wh ? { lat: wh.lat, lng: wh.lng } : null;
     };
 
-    // If the app is opened at the /dashboard path, show a WhatsApp-only ordering page
-    const isDashboardPath = typeof window !== 'undefined' && window.location && window.location.pathname.startsWith('/dashboard');
-
-    const WhatsAppOnly = () => {
-        const waNumber = '917739339852';
-        const message = `Hello AQUAVIORA Team, I would like to place an order.`;
-        const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
-        return (
-            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f6fbfc' }}>
-                <div style={{ textAlign: 'center', padding: 32, borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.08)', background: 'white', maxWidth: 520 }}>
-                    <h1 style={{ marginBottom: 8 }}>Order via WhatsApp</h1>
-                    <p style={{ color: '#666', marginBottom: 18 }}>We have disabled the dashboard — please place orders only through WhatsApp.</p>
-                    <a href={waUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-block', background: '#25D366', color: 'white', padding: '12px 20px', borderRadius: 999, fontWeight: 700, textDecoration: 'none' }}>
-                        <i className="fab fa-whatsapp" style={{ marginRight: 10 }}></i> Message on WhatsApp
-                    </a>
-                    <div style={{ marginTop: 16, color: '#999', fontSize: '0.9rem' }}>Or contact: +91 77393 39852</div>
-                </div>
-            </div>
-        );
-    };
-
-    if (isDashboardPath) return <WhatsAppOnly />;
-
     return (
         <div style={{ minHeight: '100vh', backgroundColor: 'var(--aq-bg)' }}>
             {/* Header Navbar (Premium AQUAVIORA Brand) */}
