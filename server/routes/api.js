@@ -74,6 +74,7 @@ router.get('/ai/forecast-demand', ai.getDemandForecast);
 
 // Customer Support Tickets APIs
 router.get('/support/tickets', support.getTickets);
+router.get('/support/tickets/:ticketId', support.getTicketById);
 router.post('/support/tickets', support.createTicket);
 router.post('/support/tickets/:ticketId/messages', support.sendTicketMessage);
 router.post('/support/tickets/:ticketId/close', support.closeTicket);

@@ -111,9 +111,21 @@ const closeTicket = async (req, res) => {
     }
 };
 
+const getTicketById = async (req, res) => {
+    try {
+        const { ticketId } = req.params;
+        const ticket = await db.supportTickets.findById(ticketId);
+        if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
+        res.json(ticket);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
 module.exports = {
     getTickets,
     createTicket,
     sendTicketMessage,
-    closeTicket
+    closeTicket,
+    getTicketById
 };

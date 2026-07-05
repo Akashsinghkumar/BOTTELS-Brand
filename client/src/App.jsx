@@ -594,6 +594,20 @@ export default function App() {
         } catch (e) {}
     };
 
+    const handleCloseTicket = async (ticketId) => {
+        try {
+            const res = await fetch(`/api/support/tickets/${ticketId}/close`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                toast.success('Ticket marked as resolved.');
+                setActiveTicket(null);
+                fetchData();
+            }
+        } catch (e) {
+            toast.error('Failed to close ticket.');
+        }
+    };
+
     // SVG Demand forecasting dataset
     const demandForecastData = useMemo(() => {
         return [
@@ -1277,37 +1291,172 @@ export default function App() {
                             )}
 
                             {adminTab === 'tickets' && (
-                                <div className="glass-panel">
-                                    <h3>Customer Support Ticket Deck</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, marginTop: 14 }}>
-                                        <div>
-                                            {tickets.map(t => (
-                                                <div key={t._id} style={{ padding: 10, border: '1px solid #ddd', borderRadius: 4, marginBottom: 6, cursor: 'pointer', background: activeTicket?._id === t._id ? '#e2f0fd' : 'white' }} onClick={() => setActiveTicket(t)}>
-                                                    <strong>{t.customerName}</strong>
-                                                    <div style={{ fontSize: '0.75rem' }}>Status: {t.status}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div>
-                                            {activeTicket ? (
-                                                <div>
-                                                    <div className="chat-window">
-                                                        <div className="chat-messages">
-                                                            {activeTicket.messages.map((m, i) => (
-                                                                <div key={i} className={`chat-bubble ${m.sender === 'customer' ? 'support' : 'customer'}`}>
-                                                                    <strong>{m.sender.toUpperCase()}:</strong>
-                                                                    <div>{m.text}</div>
-                                                                </div>
-                                                            ))}
+                                <div className="glass-panel" style={{ padding: 24 }}>
+                                    <h3 style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                        <i className="fas fa-headset" style={{ color: 'var(--aq-primary)' }}></i> Customer Support Control Center
+                                    </h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1.2fr', gap: 16, height: 600 }}>
+                                        
+                                        {/* Left Panel: Conversations Queue */}
+                                        <div style={{ background: '#f8fafc', border: '1px solid var(--aq-border)', borderRadius: 12, padding: 14, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--aq-muted)', borderBottom: '1px solid var(--aq-border)', paddingBottom: 8 }}>Conversations</h4>
+                                            {tickets.map(t => {
+                                                const isWaiting = t.status === 'Open';
+                                                const isSelf = activeTicket?._id === t._id;
+                                                return (
+                                                    <div 
+                                                        key={t._id} 
+                                                        style={{ 
+                                                            padding: 12, 
+                                                            border: isSelf ? '1.5px solid var(--aq-primary)' : '1px solid var(--aq-border)', 
+                                                            borderRadius: 8, 
+                                                            cursor: 'pointer', 
+                                                            background: isSelf ? '#e0f7fa' : 'white', 
+                                                            transition: 'all 0.2s ease',
+                                                            boxShadow: isSelf ? 'var(--aq-card-shadow)' : 'none'
+                                                        }} 
+                                                        onClick={() => setActiveTicket(t)}
+                                                    >
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                                            <strong style={{ fontSize: '0.9rem' }}>{t.customerName}</strong>
+                                                            <span style={{ 
+                                                                fontSize: '0.65rem', 
+                                                                padding: '2px 6px', 
+                                                                borderRadius: 12, 
+                                                                fontWeight: 700, 
+                                                                background: isWaiting ? '#ffe0b2' : '#c8e6c9', 
+                                                                color: isWaiting ? '#e65100' : '#2e7d32' 
+                                                            }}>
+                                                                {isWaiting ? 'Waiting' : 'Resolved'}
+                                                            </span>
                                                         </div>
-                                                        <div className="chat-input-bar">
-                                                            <input className="form-input" style={{ marginBottom: 0 }} placeholder="Reply customer..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendHelpMessage('support')} />
-                                                            <button className="btn btn-primary" onClick={() => sendHelpMessage('support')}>Reply</button>
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--aq-muted)' }}>Ticket ID: {t._id.substring(0, 8)}...</div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Center Panel: Mirrored Support Chat */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--aq-border)', borderRadius: 12, overflow: 'hidden', background: 'white' }}>
+                                            {activeTicket ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                                    {/* Header */}
+                                                    <div style={{ padding: '12px 16px', background: '#f8fafc', borderBottom: '1px solid var(--aq-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <div>
+                                                            <strong style={{ fontSize: '0.95rem' }}>{activeTicket.customerName}</strong>
+                                                            <div style={{ fontSize: '0.7rem', color: 'var(--aq-muted)' }}>Active chat session</div>
+                                                        </div>
+                                                        {activeTicket.status === 'Open' && (
+                                                            <button 
+                                                                className="aq-invoice-btn" 
+                                                                style={{ backgroundColor: '#2e7d32', padding: '6px 12px', fontSize: '0.75rem' }} 
+                                                                onClick={() => handleCloseTicket(activeTicket._id)}
+                                                            >
+                                                                <i className="fas fa-check"></i> Mark Resolved
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Messages pane */}
+                                                    <div className="aq-chat-messages" style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto' }}>
+                                                        {activeTicket.messages.map((m, i) => {
+                                                            const isAgent = m.sender === 'bot' || m.sender === 'support';
+                                                            return (
+                                                                <div key={i} className={`aq-chat-row ${isAgent ? 'customer' : 'bot'}`} style={{ maxWidth: '85%' }}>
+                                                                    <div className={`aq-msg-avatar ${isAgent ? '' : 'bot-avatar'}`} style={{ width: 24, height: 24, fontSize: '0.7rem' }}>
+                                                                        {isAgent ? 'AG' : activeTicket.customerName.substring(0, 2).toUpperCase()}
+                                                                    </div>
+                                                                    <div className="aq-msg-bubble">
+                                                                        <div>{m.text}</div>
+                                                                        <span className="aq-msg-time">
+                                                                            {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Input controls & Canned Responses Selector */}
+                                                    <div style={{ padding: 12, borderTop: '1px solid var(--aq-border)', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--aq-muted)' }}>Canned Responses:</label>
+                                                            <select 
+                                                                className="form-input" 
+                                                                style={{ marginBottom: 0, padding: '4px 8px', fontSize: '0.8rem', width: 'auto', flex: 1 }}
+                                                                onChange={(e) => {
+                                                                    if (e.target.value) {
+                                                                        setChatInput(e.target.value);
+                                                                        e.target.value = ''; // reset select
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <option value="">-- Choose canned response templates --</option>
+                                                                <option value="Hi! Could you please share your Order ID so I can look up the details for you?">Request Order ID</option>
+                                                                <option value="You can chat with our support team on WhatsApp directly here: https://wa.me/917739339852">Share WhatsApp link</option>
+                                                                <option value="Our Private Label customized premium water bottles have a minimum order quantity (MOQ) of 500 bottles. Please let us know the delivery location to calculate rates.">Private Label MOQ</option>
+                                                                <option value="Orders can be cancelled prior to dispatch. Refunds are processed within 3-5 business days back to the original payment source.">Refund/Cancellation Policy</option>
+                                                                <option value="Standard delivery is within 2-4 hours inside local warehouse areas. Jars are delivered daily between 8 AM and 12 PM.">Delivery Timeframe</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="aq-chat-input-container" style={{ padding: 0, border: 'none' }}>
+                                                            <div className="aq-chat-input-pill" style={{ padding: '2px 12px' }}>
+                                                                <input 
+                                                                    className="aq-chat-input-field" 
+                                                                    placeholder="Reply to customer..." 
+                                                                    value={chatInput} 
+                                                                    onChange={(e) => setChatInput(e.target.value)} 
+                                                                    onKeyDown={(e) => e.key === 'Enter' && sendHelpMessage('support')} 
+                                                                />
+                                                            </div>
+                                                            <button className="aq-chat-send-btn" onClick={() => sendHelpMessage('support')} style={{ width: 34, height: 34, fontSize: '0.85rem' }}>
+                                                                <i className="fas fa-paper-plane"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div style={{ padding: 30, textAlign: 'center', border: '1px dashed #ccc' }}>Select ticket session</div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--aq-muted)', padding: 30 }}>
+                                                    <i className="fas fa-comments" style={{ fontSize: '3rem', marginBottom: 12, opacity: 0.5 }}></i>
+                                                    <div>Select a ticket from the left panel to begin replying</div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Right Panel: CRM Customer Context */}
+                                        <div style={{ background: '#f8fafc', border: '1px solid var(--aq-border)', borderRadius: 12, padding: 14, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                            <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--aq-muted)', borderBottom: '1px solid var(--aq-border)', paddingBottom: 8 }}>Customer CRM Context</h4>
+                                            {activeTicket ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--aq-muted)' }}>Customer Name:</div>
+                                                        <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{activeTicket.customerName}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--aq-muted)' }}>Customer ID:</div>
+                                                        <div style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}>{activeTicket.customerId}</div>
+                                                    </div>
+                                                    
+                                                    {/* Filter recent orders for this customer */}
+                                                    <div style={{ borderTop: '1px solid var(--aq-border)', paddingTop: 10, marginTop: 4 }}>
+                                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--aq-muted)', marginBottom: 8 }}>Recent Orders:</div>
+                                                        {orders.filter(o => o.customerId === activeTicket.customerId).length > 0 ? (
+                                                            orders.filter(o => o.customerId === activeTicket.customerId).map(o => (
+                                                                <div key={o._id} style={{ padding: 8, background: 'white', border: '1px solid var(--aq-border)', borderRadius: 6, marginBottom: 6, fontSize: '0.75rem' }}>
+                                                                    <div style={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between' }}>
+                                                                        <span>ID: {o._id.substring(0, 8)}</span>
+                                                                        <span style={{ color: 'var(--aq-primary)' }}>₹{o.totalAmount}</span>
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--aq-muted)' }}>Status: {o.status}</div>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--aq-muted)', fontStyle: 'italic' }}>No orders found for this user.</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--aq-muted)', fontStyle: 'italic', textAlign: 'center', marginTop: 30 }}>No ticket active</div>
                                             )}
                                         </div>
                                     </div>
