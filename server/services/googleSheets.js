@@ -2,26 +2,44 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
 
-const CREDENTIALS_PATH = path.join(__dirname, '../../credentials.json');
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Placeholder, user needs to set this
+const CREDENTIALS_PATH = process.env.GOOGLE_CREDENTIALS_PATH || path.join(__dirname, '../../credentials.json');
+const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID || 'YOUR_SPREADSHEET_ID';
 
 let sheets = null;
 
 const initGoogleSheets = async () => {
-    if (fs.existsSync(CREDENTIALS_PATH)) {
-        try {
-            const auth = new google.auth.GoogleAuth({
+    try {
+        let auth;
+        if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+            try {
+                const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+                auth = new google.auth.GoogleAuth({
+                    credentials,
+                    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+                });
+                console.log('Using service account credentials from GOOGLE_SERVICE_ACCOUNT_JSON environment variable');
+            } catch (jsonErr) {
+                console.error('Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON env variable:', jsonErr.message);
+            }
+        }
+
+        if (!auth && fs.existsSync(CREDENTIALS_PATH)) {
+            auth = new google.auth.GoogleAuth({
                 keyFile: CREDENTIALS_PATH,
                 scopes: ['https://www.googleapis.com/auth/spreadsheets'],
             });
+            console.log(`Using credentials from key file: ${CREDENTIALS_PATH}`);
+        }
+
+        if (auth) {
             const authClient = await auth.getClient();
             sheets = google.sheets({ version: 'v4', auth: authClient });
             console.log('Google Sheets API Authenticated');
-        } catch (error) {
-            console.error('Failed to authenticate Google Sheets:', error.message);
+        } else {
+            console.warn('Warning: No Google Sheets credentials found. Sync will be skipped.');
         }
-    } else {
-        console.warn('Warning: credentials.json not found. Google Sheets sync will be skipped.');
+    } catch (error) {
+        console.error('Failed to authenticate Google Sheets:', error.message);
     }
 };
 
