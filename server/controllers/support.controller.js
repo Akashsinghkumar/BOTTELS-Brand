@@ -45,6 +45,10 @@ const sendTicketMessage = async (req, res) => {
                 botText = "Our pricing standard PET bottle rates: 250ml (₹10), 500ml (₹20), 600ml (₹22), 1L (₹25-30), and 20L jar (₹25-30). We offer special discounts on orders exceeding 10 Peti cases!";
             } else if (query.includes('private label') || query.includes('brand') || query.includes('custom')) {
                 botText = "To request a Private Label branding quote, select the 'Private Label' option during checkout or message our sales team on WhatsApp directly!";
+            } else if (query.includes('agent') || query.includes('human') || query.includes('talk') || query.includes('connect')) {
+                botText = "Connecting you to a live agent. Average wait: 2 minutes.";
+            } else if (query.includes('whatsapp') || query.includes('number') || query.includes('contact')) {
+                botText = "You can chat with our support team on WhatsApp directly here: https://wa.me/917739339852";
             }
 
             // Append bot message
