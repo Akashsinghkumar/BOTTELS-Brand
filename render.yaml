@@ -1,7 +1,7 @@
 services:
   - type: web
     name: bottels-app
-    env: node
+    runtime: node
     plan: free
     rootDir: .
     buildCommand: npm run build
