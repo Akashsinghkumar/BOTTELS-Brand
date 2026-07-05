@@ -37,7 +37,7 @@ In the Render dashboard, add these environment variables:
 ```
 PORT=10000
 NODE_ENV=production
-MONGODB_URI=<your_mongodb_connection_string>
+MONGO_URI=<your_mongodb_connection_string>
 GOOGLE_SHEETS_ID=<your_sheets_id>
 GOOGLE_SERVICE_ACCOUNT_JSON=<your_service_account_json>
 ```

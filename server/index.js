@@ -85,7 +85,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`Dashboard client served on http://localhost:${PORT}/dashboard`);
-});
+// Export app for serverless / Vercel compatibility
+module.exports = app;
+
+// Only listen if not running in Vercel environment
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+        console.log(`Dashboard client served on http://localhost:${PORT}/dashboard`);
+    });
+}
