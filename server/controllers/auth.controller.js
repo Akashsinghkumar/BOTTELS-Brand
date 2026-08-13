@@ -1,78 +1,34 @@
-const db = require('../database/db_client');
+import db from '../database/db_client.js';
 
-// In-memory OTP store (Key: Email or Mobile, Value: { otp, expires })
 const otps = new Map();
 
-// NodeMailer dynamic import for real email sending
-let nodemailer;
-try {
-    nodemailer = require('nodemailer');
-} catch (e) {
-    console.log('nodemailer not installed. Real email notifications will fall back to simulated console logs.');
-}
-
-const sendOTP = async (req, res) => {
+export const sendOTP = async (req, res) => {
     try {
-        const { channel } = req.body; // email or phone
+        const body = req.body || (req.json ? await req.json() : {});
+        const { channel } = body;
         if (!channel) {
-            return res.status(400).json({ error: 'Email or Mobile Number is required.' });
+            const errObj = { error: 'Email or Mobile Number is required.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
         const isEmail = /\S+@\S+\.\S+/.test(channel);
         const isPhone = /^\+?[0-9]{10,15}$/.test(channel.replace(/[\s-()]/g, ''));
 
         if (!isEmail && !isPhone) {
-            return res.status(400).json({ error: 'Please enter a valid Gmail address or 10-digit Mobile Number.' });
+            const errObj = { error: 'Please enter a valid Gmail address or 10-digit Mobile Number.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        // Generate a 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        // Expire in 5 minutes
         otps.set(channel, {
             otp,
             expires: Date.now() + 5 * 60 * 1000
         });
 
-        // 1. Log to console
         console.log(`[OTP VERIFICATION] Generated OTP for ${channel}: ${otp}`);
 
-        // 2. Write to notification logs in the system database
-        // This makes it show up in the simulator's "Message Logs Stream" widget on the Admin UI
         await db.notificationLogs.create({
-            userId: 'guest',
-            type: isEmail ? 'Email' : 'SMS',
             recipient: channel,
-            message: `Your AQUAVIORA login verification OTP is: ${otp}. It is valid for 5 minutes.`
-        });
-
-        // 3. Try to send real email if SMTP credentials exist in environment
-        if (isEmail && nodemailer && process.env.SMTP_HOST && process.env.SMTP_USER) {
-            const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: parseInt(process.env.SMTP_PORT || '587'),
-                secure: process.env.SMTP_SECURE === 'true',
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS
-                }
-            });
-
-            await transporter.sendMail({
-                from: process.env.SMTP_FROM || '"AQUAVIORA Support" <support@aquaviora.com>',
-                to: channel,
-                subject: 'AQUAVIORA Verification Code',
-                text: `Your login verification code is ${otp}. It is valid for 5 minutes.`,
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f9fbfd;">
-                        <h2 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px;">AQUAVIORA Verification</h2>
-                        <p style="font-size: 1rem; color: #333;">Use the code below to complete your login or registration:</p>
-                        <div style="font-size: 2rem; font-weight: bold; letter-spacing: 4px; text-align: center; color: #00bcd4; background: #e0f7fa; padding: 15px; border-radius: 6px; margin: 20px 0;">
-                            ${otp}
-                        </div>
-                        <p style="font-size: 0.85rem; color: #666;">This code is valid for 5 minutes. Please do not share this code with anyone.</p>
-                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-                        <p style="font-size: 0.75rem; text-align: center; color: #999;">&copy; 2026 AQUAVIORA. All Rights Reserved.</p>
             channel: isEmail ? 'EMAIL' : 'SMS',
             message: `Your AQUAVIORA Verification Code is ${otp}. Valid for 5 minutes.`,
             status: 'SENT'
@@ -120,53 +76,131 @@ export const verifyOTP = async (req, res) => {
 
         otps.delete(channel);
 
-    try {
-        const { username, email, password, role, phone } = req.body;
-        if (!username || !email || !password || !role) {
-            return res.status(400).json({ error: 'All fields are required.' });
-        }
-        const existing = await db.users.findOne({ username });
-        if (existing) {
-            return res.status(400).json({ error: 'Username already exists.' });
-        }
-        const user = await db.users.create({
-            username,
-            email,
-            phone,
-            passwordHash: password,
-            role
-        });
-        await db.auditLogs.create({
-            username: user.username,
-            role: user.role,
-            action: 'USER_SIGNUP',
-            details: `User registered with role ${role}.`,
-            ipAddress: req.ip
-        });
-        res.status(201).json({ success: true, user: { id: user._id, username: user.username, email: user.email, phone: user.phone, role: user.role } });
+        let user = await db.users.findOne({ $or: [{ email: channel }, { phone: channel }] });
+        let isExistingUser = !!user;
+
+        const data = {
+            success: true,
+            message: 'OTP verified successfully!',
+            isExistingUser,
+            user: user ? { id: user._id || user.id, username: user.username, email: user.email, phone: user.phone, role: user.role } : null
+        };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-const login = async (req, res) => {
+export const completeRegistration = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = await db.users.findOne({ username });
-        if (!user || user.passwordHash !== password) {
-            return res.status(401).json({ error: 'Invalid username or password.' });
+        const body = req.body || (req.json ? await req.json() : {});
+        const { name, channel, addresses, businessType, role = 'customer' } = body;
+        if (!name || !channel) {
+            const errObj = { error: 'Name and Channel are required.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
+
+        const isEmail = /\S+@\S+\.\S+/.test(channel);
+        const email = isEmail ? channel : `${name.toLowerCase().replace(/\s+/g, '')}@aquaviora-customer.com`;
+        const phone = isEmail ? '' : channel;
+
+        let user = await db.users.findOne({ $or: [{ email }, { phone }] });
+        if (!user) {
+            user = await db.users.create({
+                username: name,
+                email,
+                phone,
+                passwordHash: 'otp_verified',
+                role,
+                businessType: businessType || 'Restaurant/Cafe',
+                savedAddresses: addresses || []
+            });
+        }
+
+        await db.auditLogs.create({
+            username: user.username,
+            role: user.role,
+            action: 'USER_REGISTRATION',
+            details: `Completed OTP registration for ${channel}`
+        });
+
+        const data = {
+            success: true,
+            message: 'Registration completed successfully!',
+            user: { id: user._id || user.id, username: user.username, email: user.email, phone: user.phone, role: user.role }
+        };
+        return res.json ? res.json(data) : Response.json(data);
+    } catch (e) {
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
+    }
+};
+
+export const signup = async (req, res) => {
+    try {
+        const body = req.body || (req.json ? await req.json() : {});
+        const { username, email, password, role = 'customer' } = body;
+        if (!username || !email || !password) {
+            const errObj = { error: 'Username, email and password are required.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
+        }
+
+        const existing = await db.users.findOne({ $or: [{ username }, { email }] });
+        if (existing) {
+            const errObj = { error: 'Username or email already exists.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
+        }
+
+        const newUser = await db.users.create({
+            username,
+            email,
+            passwordHash: password,
+            role
+        });
+
+        await db.auditLogs.create({
+            username: newUser.username,
+            role: newUser.role,
+            action: 'USER_SIGNUP',
+            details: `User created with role ${role}`
+        });
+
+        const data = {
+            success: true,
+            user: { id: newUser._id || newUser.id, username: newUser.username, email: newUser.email, role: newUser.role }
+        };
+        return res.status ? res.status(201).json(data) : Response.json(data, { status: 201 });
+    } catch (e) {
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
+    }
+};
+
+export const login = async (req, res) => {
+    try {
+        const body = req.body || (req.json ? await req.json() : {});
+        const { username, password } = body;
+        const user = await db.users.findOne({ $or: [{ username }, { email: username }] });
+
+        if (!user || user.passwordHash !== password) {
+            const errObj = { error: 'Invalid username or password.' };
+            return res.status ? res.status(401).json(errObj) : Response.json(errObj, { status: 401 });
+        }
+
         await db.auditLogs.create({
             username: user.username,
             role: user.role,
             action: 'USER_LOGIN',
-            details: `User logged in successfully.`,
-            ipAddress: req.ip
+            details: `User logged in successfully.`
         });
-        res.json({ success: true, user: { id: user._id, username: user.username, email: user.email, phone: user.phone, role: user.role } });
+
+        const data = { success: true, user: { id: user._id || user.id, username: user.username, email: user.email, phone: user.phone, role: user.role } };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-module.exports = { signup, login, sendOTP, verifyOTP, completeRegistration };
+export default { signup, login, sendOTP, verifyOTP, completeRegistration };
