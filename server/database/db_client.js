@@ -197,7 +197,7 @@ class CollectionWrapper {
     }
 }
 
-module.exports = {
+const db = {
     users: new CollectionWrapper('users'),
     warehouses: new CollectionWrapper('warehouses'),
     orders: new CollectionWrapper('orders'),
@@ -207,3 +207,6 @@ module.exports = {
     enquiries: new CollectionWrapper('enquiries'),
     getMemoryStore: () => memoryDB
 };
+
+export default db;
+

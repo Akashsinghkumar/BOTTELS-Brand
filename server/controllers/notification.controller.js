@@ -1,35 +1,43 @@
-const db = require('../database/db_client');
+import db from '../database/db_client.js';
 
-const getNotifications = async (req, res) => {
+export const getNotifications = async (req, res) => {
     try {
-        const logs = await db.notificationLogs.find();
-        res.json(logs);
+        const env = req.env || (req.c ? req.c.env : null);
+        const logs = await db.notificationLogs.find({}, env);
+        return res.json ? res.json(logs) : Response.json(logs);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-const sendSimulatedNotification = async (req, res) => {
+export const sendSimulatedNotification = async (req, res) => {
     try {
-        const { userId, type, recipient, message } = req.body;
-        if (!type || !recipient || !message) {
-            return res.status(400).json({ error: 'Type, recipient, and message are required.' });
+        const env = req.env || (req.c ? req.c.env : null);
+        const body = req.body || (req.json ? await req.json() : {});
+        const { userId, type, recipient, message } = body;
+
+        if (!recipient || !message) {
+            const errObj = { error: 'Recipient and message are required.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
         const log = await db.notificationLogs.create({
-            userId: userId || 'system',
-            type,
             recipient,
-            message
-        });
+            channel: type || 'SMS',
+            message,
+            status: 'SENT'
+        }, env);
 
-        res.json({ success: true, log });
+        const data = { success: true, log };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-module.exports = {
+export default {
     getNotifications,
     sendSimulatedNotification
 };

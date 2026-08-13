@@ -1,8 +1,7 @@
-const db = require('../database/db_client');
+import db from '../database/db_client.js';
 
-// Distance helper
 function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -12,31 +11,29 @@ function getDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-// AI ETA Prediction API
-const predictETA = async (req, res) => {
+export const predictETA = async (req, res) => {
     try {
-        const { startLat, startLng, endLat, endLng, trafficLevel, weatherCondition } = req.body;
+        const body = req.body || (req.json ? await req.json() : {});
+        const { startLat, startLng, endLat, endLng, trafficLevel, weatherCondition } = body;
         
         if (!startLat || !startLng || !endLat || !endLng) {
-            return res.status(400).json({ error: 'Start and end coordinates are required.' });
+            const errObj = { error: 'Start and end coordinates are required.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
         const distance = getDistance(startLat, startLng, endLat, endLng);
-
-        // Adjusting multipliers based on inputs
         const trafficMultipliers = { 'Low': 0.8, 'Normal': 1.0, 'High': 1.6, 'Severe Jam': 2.5 };
         const weatherMultipliers = { 'Clear': 1.0, 'Rainy': 1.4, 'Stormy': 2.0, 'Heavy Fog': 1.8 };
 
         const tMult = trafficMultipliers[trafficLevel] || 1.0;
         const wMult = weatherMultipliers[weatherCondition] || 1.0;
-        const basePrepTime = 12; // 12 minutes base prep and packaging
+        const basePrepTime = 12;
 
-        // ETA regression simulation formula
-        const travelSpeedMinutesPerKm = 2.2; // roughly 27km/h average city speed
+        const travelSpeedMinutesPerKm = 2.2;
         const travelTime = distance * travelSpeedMinutesPerKm * tMult * wMult;
         const etaMinutes = Math.round(basePrepTime + travelTime);
 
-        res.json({
+        const data = {
             success: true,
             distanceKm: parseFloat(distance.toFixed(2)),
             basePrepTime,
@@ -44,111 +41,92 @@ const predictETA = async (req, res) => {
             trafficMultiplier: tMult,
             weatherMultiplier: wMult,
             predictedETAMinutes: etaMinutes
-        });
+        };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-// Route Optimization - Waypoints Generator
-const getOptimizedRoute = async (req, res) => {
+export const getOptimizedRoute = async (req, res) => {
     try {
-        const { startLat, startLng, endLat, endLng } = req.body;
+        const body = req.body || (req.json ? await req.json() : {});
+        const { startLat, startLng, endLat, endLng, steps = 8 } = body;
 
         if (!startLat || !startLng || !endLat || !endLng) {
-            return res.status(400).json({ error: 'Start and end coordinates are required.' });
+            const errObj = { error: 'Coordinates required' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        // Generate 8 waypoints to simulate road routes instead of a straight line
         const waypoints = [];
-        const steps = 8;
-        
         for (let i = 0; i <= steps; i++) {
-            const ratio = i / steps;
-            // Linear interpolation
-            let lat = startLat + (endLat - startLat) * ratio;
-            let lng = startLng + (endLng - startLng) * ratio;
+            const factor = i / steps;
+            let lat = startLat + (endLat - startLat) * factor;
+            let lng = startLng + (endLng - startLng) * factor;
 
-            // Add slight random deviations at intermediate steps to resemble street grids
             if (i > 0 && i < steps) {
-                const devLat = (Math.random() - 0.5) * 0.003;
-                const devLng = (Math.random() - 0.5) * 0.003;
-                lat += devLat;
-                lng += devLng;
+                lat += (Math.random() - 0.5) * 0.003;
+                lng += (Math.random() - 0.5) * 0.003;
             }
-
-            waypoints.push({ lat, lng });
+            waypoints.push({ lat: parseFloat(lat.toFixed(5)), lng: parseFloat(lng.toFixed(5)) });
         }
 
-        res.json({
+        const data = {
             success: true,
-            waypoints,
-            message: 'Optimized route coordinates generated.'
-        });
+            start: { lat: startLat, lng: startLng },
+            destination: { lat: endLat, lng: endLng },
+            waypointsCount: waypoints.length,
+            waypoints
+        };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-// Demand Forecasting API
-const getDemandForecast = async (req, res) => {
+export const getDemandForecast = async (req, res) => {
     try {
-        const { warehouseId } = req.query;
-        const warehouse = await db.warehouses.findById(warehouseId || 'w1');
+        const warehouseId = req.params?.warehouseId || req.query?.warehouseId || 'w1';
+        const warehouse = await db.warehouses.findById(warehouseId);
+
         if (!warehouse) {
-            return res.status(404).json({ error: 'Warehouse not found' });
+            const errObj = { error: 'Warehouse not found' };
+            return res.status ? res.status(404).json(errObj) : Response.json(errObj, { status: 404 });
         }
 
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const todayIndex = new Date().getDay();
+        const bottleSizes = ['250ml', '500ml', '600ml', '1L', '20L'];
+        const forecast = {};
 
-        // 7-day forecast dataset
-        const forecast = [];
-        const productIds = ['250ml', '500ml', '600ml', '1L', '20L'];
+        bottleSizes.forEach(size => {
+            const currentStock = (warehouse.inventory && warehouse.inventory[size]) || 200;
+            const dailyBurnRate = Math.round(currentStock * 0.12 + Math.random() * 20);
+            const predicted7DayDemand = dailyBurnRate * 7;
+            const isReorderNeeded = currentStock < predicted7DayDemand;
 
-        for (let i = 0; i < 7; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() + i);
-            const dayName = days[date.getDay()];
+            forecast[size] = {
+                currentStock,
+                estimatedDailyUsage: dailyBurnRate,
+                predicted7DayDemand,
+                reorderRecommended: isReorderNeeded,
+                suggestedReorderQuantity: isReorderNeeded ? Math.max(500, predicted7DayDemand * 2 - currentStock) : 0
+            };
+        });
 
-            const itemsForecast = {};
-            productIds.forEach(pId => {
-                const baseDemand = warehouse.inventory[pId] ? Math.round(warehouse.inventory[pId] * 0.15) : 30;
-                // Add weekend multiplier for smaller bottles, weekday multiplier for jars
-                let dayMultiplier = 1.0;
-                if (pId === '20L') { // corporate offices order jars on weekdays
-                    dayMultiplier = (dayName === 'Saturday' || dayName === 'Sunday') ? 0.3 : 1.2;
-                } else { // event bottles ordered more on weekends
-                    dayMultiplier = (dayName === 'Friday' || dayName === 'Saturday') ? 1.4 : 0.9;
-                }
-
-                // Trend factor (gradually increasing sales)
-                const trend = 1 + (i * 0.02);
-
-                // Add random variance (+/- 10%)
-                const variance = 0.9 + Math.random() * 0.2;
-
-                itemsForecast[pId] = Math.round(baseDemand * dayMultiplier * trend * variance);
-            });
-
-            forecast.push({
-                day: dayName,
-                date: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-                forecastedSales: itemsForecast
-            });
-        }
-
-        res.json({
+        const data = {
             success: true,
             warehouseName: warehouse.name,
             forecast
-        });
+        };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-module.exports = {
+export default {
     predictETA,
     getOptimizedRoute,
     getDemandForecast

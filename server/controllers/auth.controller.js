@@ -73,117 +73,53 @@ const sendOTP = async (req, res) => {
                         <p style="font-size: 0.85rem; color: #666;">This code is valid for 5 minutes. Please do not share this code with anyone.</p>
                         <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
                         <p style="font-size: 0.75rem; text-align: center; color: #999;">&copy; 2026 AQUAVIORA. All Rights Reserved.</p>
-                    </div>
-                `
-            });
-            console.log(`Real email OTP sent successfully to ${channel}`);
-        }
+            channel: isEmail ? 'EMAIL' : 'SMS',
+            message: `Your AQUAVIORA Verification Code is ${otp}. Valid for 5 minutes.`,
+            status: 'SENT'
+        });
 
-        res.json({ success: true, message: `Verification OTP code sent to ${channel}.` });
+        const data = {
+            success: true,
+            message: `OTP sent successfully to ${channel}`,
+            channel: isEmail ? 'email' : 'phone',
+            simulatedOTP: otp
+        };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-const verifyOTP = async (req, res) => {
+export const verifyOTP = async (req, res) => {
     try {
-        const { channel, otp } = req.body;
+        const body = req.body || (req.json ? await req.json() : {});
+        const { channel, otp } = body;
         if (!channel || !otp) {
-            return res.status(400).json({ error: 'Channel and OTP code are required.' });
+            const errObj = { error: 'Channel and OTP are required.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        const entry = otps.get(channel);
-        if (!entry) {
-            return res.status(400).json({ error: 'No active verification request found for this number or email.' });
+        const record = otps.get(channel);
+
+        if (!record) {
+            const errObj = { error: 'No OTP requested for this number/email. Please request a new OTP.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        if (Date.now() > entry.expires) {
+        if (Date.now() > record.expires) {
             otps.delete(channel);
-            return res.status(400).json({ error: 'Verification code has expired. Please request a new one.' });
+            const errObj = { error: 'OTP has expired. Please request a new one.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        if (entry.otp !== otp) {
-            return res.status(400).json({ error: 'Invalid verification code. Please try again.' });
+        if (record.otp !== otp.toString().trim()) {
+            const errObj = { error: 'Invalid OTP code entered. Please check and try again.' };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        // OTP matched, consume it
         otps.delete(channel);
 
-        // Check if user already exists
-        const isEmail = /\S+@\S+\.\S+/.test(channel);
-        let user = null;
-        if (isEmail) {
-            user = await db.users.findOne({ email: channel });
-        } else {
-            user = await db.users.findOne({ phone: channel });
-        }
-
-        if (user) {
-            // Log successful login audit
-            await db.auditLogs.create({
-                username: user.username,
-                role: user.role,
-                action: 'USER_LOGIN',
-                details: `User logged in via OTP verification (${channel}).`,
-                ipAddress: req.ip
-            });
-            return res.json({ success: true, verified: true, exists: true, user: { id: user._id, username: user.username, email: user.email, phone: user.phone, role: user.role } });
-        } else {
-            // User does not exist, redirect to complete profile fields
-            return res.json({ success: true, verified: true, exists: false, message: 'OTP verified. Complete registration.' });
-        }
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-const completeRegistration = async (req, res) => {
-    try {
-        const { channel, username, password } = req.body;
-        if (!channel || !username || !password) {
-            return res.status(400).json({ error: 'All fields are required.' });
-        }
-
-        // Check if username already exists
-        const userExists = await db.users.findOne({ username });
-        if (userExists) {
-            return res.status(400).json({ error: 'Username already taken. Please choose another.' });
-        }
-
-        const isEmail = /\S+@\S+\.\S+/.test(channel);
-        const userData = {
-            username,
-            passwordHash: password,
-            role: 'customer'
-        };
-
-        if (isEmail) {
-            userData.email = channel;
-        } else {
-            userData.phone = channel;
-            userData.email = `${username.toLowerCase()}@aquaviora.com`; // default placeholder email
-        }
-
-        const newUser = await db.users.create(userData);
-
-        await db.auditLogs.create({
-            username: newUser.username,
-            role: newUser.role,
-            action: 'USER_SIGNUP',
-            details: `User registered via OTP flow (${channel}) with role customer.`,
-            ipAddress: req.ip
-        });
-
-        res.status(201).json({
-            success: true,
-            user: { id: newUser._id, username: newUser.username, email: newUser.email, phone: newUser.phone, role: newUser.role }
-        });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-};
-
-const signup = async (req, res) => {
     try {
         const { username, email, password, role, phone } = req.body;
         if (!username || !email || !password || !role) {

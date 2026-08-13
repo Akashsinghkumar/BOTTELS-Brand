@@ -1,11 +1,8 @@
-const assert = require('assert');
+import assert from 'assert';
+import orderController from '../controllers/order.controller.js';
+import aiController from '../controllers/ai.controller.js';
+import db from '../database/db_client.js';
 
-// 1. Load controllers
-const orderController = require('../controllers/order.controller');
-const aiController = require('../controllers/ai.controller');
-const db = require('../database/db_client');
-
-// Mock request / response objects
 const mockRes = () => {
     const res = {};
     res.status = (code) => {
@@ -26,17 +23,13 @@ const mockRes = () => {
 async function runTests() {
     console.log('--- STARTING PLATFORM TESTS ---');
 
-    // Test 1: Distance and Warehouse Assignment
     console.log('\nRunning Test 1: Bounding-box Warehouse Assignment...');
-    // Connect coordinates for Delhi Connaught Place
     const cpCoords = { lat: 28.6304, lng: 77.2177 };
     
-    // We expect the closest warehouse to be 'Delhi NCR Hub' (w5)
     const warehouses = await db.warehouses.find();
     let closestWh = null;
     let minDistance = Infinity;
 
-    // Helper functions from order.controller for distance calculation
     function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -60,12 +53,11 @@ async function runTests() {
     assert.strictEqual(closestWh.city, 'Delhi', 'Delhi customer should be routed to Delhi warehouse');
     console.log('✅ Test 1 Passed!');
 
-    // Test 2: AI ETA Prediction Regression Formula
     console.log('\nRunning Test 2: AI-Powered ETA Multipliers...');
     const reqETA = {
         body: {
-            startLat: 28.6210, startLng: 77.2090, // Delhi Warehouse
-            endLat: 28.6304, endLng: 77.2177,     // Connaught Place Customer
+            startLat: 28.6210, startLng: 77.2090,
+            endLat: 28.6304, endLng: 77.2177,
             trafficLevel: 'High',
             weatherCondition: 'Rainy'
         }
@@ -78,7 +70,6 @@ async function runTests() {
     assert.ok(resETA.body.predictedETAMinutes > 12, 'ETA should be greater than base prep time');
     console.log('✅ Test 2 Passed!');
 
-    // Test 3: Waypoints Interpolation
     console.log('\nRunning Test 3: Optimized Route Waypoints Generator...');
     const reqRoute = {
         body: {
@@ -94,13 +85,12 @@ async function runTests() {
     assert.strictEqual(resRoute.body.waypoints.length, 9, 'Should return exactly interpolation steps + 1');
     console.log('✅ Test 3 Passed!');
 
-    // Test 4: Inventory validation
     console.log('\nRunning Test 4: Checkout Stock Checks...');
     const reqOrder = {
         body: {
             name: 'Akash Test',
             phone: '9988776655',
-            items: [{ productId: '250ml', title: '250ml Mini', quantity: 99999, price: 10 }], // Huge Quantity
+            items: [{ productId: '250ml', title: '250ml Mini', quantity: 99999, price: 10 }],
             shippingAddressDetails: { lat: 28.6304, lng: 77.2177, city: 'Delhi', address: 'CP' },
             paymentMethod: 'COD'
         },

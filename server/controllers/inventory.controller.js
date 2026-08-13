@@ -1,22 +1,28 @@
-const db = require('../database/db_client');
+import db from '../database/db_client.js';
 
-const getWarehouses = async (req, res) => {
+export const getWarehouses = async (req, res) => {
     try {
-        const warehouses = await db.warehouses.find();
-        res.json(warehouses);
+        const env = req.env || (req.c ? req.c.env : null);
+        const warehouses = await db.warehouses.find({}, env);
+        const data = warehouses;
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-const restockWarehouse = async (req, res) => {
+export const restockWarehouse = async (req, res) => {
     try {
-        const { warehouseId } = req.params;
-        const { inventoryUpdates } = req.body; // { '250ml': 100, etc. }
+        const env = req.env || (req.c ? req.c.env : null);
+        const warehouseId = req.params?.warehouseId || (req.req ? req.req.param('warehouseId') : null);
+        const body = req.body || (req.json ? await req.json() : {});
+        const { inventoryUpdates, updatedBy } = body;
 
-        const warehouse = await db.warehouses.findById(warehouseId);
+        const warehouse = await db.warehouses.findById(warehouseId, env);
         if (!warehouse) {
-            return res.status(404).json({ error: 'Warehouse not found.' });
+            const errObj = { error: 'Warehouse not found.' };
+            return res.status ? res.status(404).json(errObj) : Response.json(errObj, { status: 404 });
         }
 
         const newInventory = { ...warehouse.inventory };
@@ -24,32 +30,33 @@ const restockWarehouse = async (req, res) => {
             newInventory[productId] = (newInventory[productId] || 0) + Number(inventoryUpdates[productId]);
         }
 
-        // Validate capacity
         let totalStock = 0;
         for (const key in newInventory) {
             totalStock += newInventory[key];
         }
-        if (totalStock > warehouse.capacity) {
-            return res.status(400).json({ error: `Exceeds warehouse capacity limit of ${warehouse.capacity} units.` });
+        if (totalStock > (warehouse.capacity || 5000)) {
+            const errObj = { error: `Exceeds warehouse capacity limit of ${warehouse.capacity || 5000} units.` };
+            return res.status ? res.status(400).json(errObj) : Response.json(errObj, { status: 400 });
         }
 
-        await db.warehouses.updateOne({ _id: warehouseId }, { $set: { inventory: newInventory } });
+        await db.warehouses.updateOne({ id: warehouseId }, { inventory: newInventory }, env);
 
         await db.auditLogs.create({
-            username: req.body.updatedBy || 'admin',
+            username: updatedBy || 'admin',
             role: 'warehouse_manager',
             action: 'INVENTORY_RESTOCK',
-            details: `Restocked warehouse ${warehouse.name}. Stock counts updated.`,
-            ipAddress: req.ip
-        });
+            details: `Restocked warehouse ${warehouse.name}.`
+        }, env);
 
-        res.json({ success: true, warehouse: { ...warehouse, inventory: newInventory } });
+        const data = { success: true, warehouse: { ...warehouse, inventory: newInventory } };
+        return res.json ? res.json(data) : Response.json(data);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        const errObj = { error: e.message };
+        return res.status ? res.status(500).json(errObj) : Response.json(errObj, { status: 500 });
     }
 };
 
-module.exports = {
+export default {
     getWarehouses,
     restockWarehouse
 };
