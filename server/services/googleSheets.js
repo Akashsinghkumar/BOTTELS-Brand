@@ -1,6 +1,13 @@
-const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
+
+let google = null;
+try {
+    const googleapis = require('googleapis');
+    google = googleapis.google;
+} catch (e) {
+    console.warn('googleapis optional module notice:', e.message);
+}
 
 const CREDENTIALS_PATH = process.env.GOOGLE_CREDENTIALS_PATH || path.join(__dirname, '../../credentials.json');
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID || 'YOUR_SPREADSHEET_ID';
@@ -9,6 +16,11 @@ let sheets = null;
 
 const initGoogleSheets = async () => {
     try {
+        if (!google) {
+            console.log('Google Sheets integration running in mock/offline mode.');
+            return;
+        }
+
         let auth;
         if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
             try {
@@ -45,19 +57,16 @@ const initGoogleSheets = async () => {
 
 const appendOrder = async (orderData) => {
     if (!sheets) {
-        console.log('[Mock] Syncing Order to Sheets:', orderData);
+        console.log('[Mock] Syncing Order to Sheets:', orderData.name || orderData.customerName);
         return;
     }
-    // Real implementation would go here
-    // await sheets.spreadsheets.values.append(...)
 };
 
 const appendEnquiry = async (enquiryData) => {
     if (!sheets) {
-        console.log('[Mock] Syncing Enquiry to Sheets:', enquiryData);
+        console.log('[Mock] Syncing Enquiry to Sheets:', enquiryData.email);
         return;
     }
-    // Real implementation would go here
 };
 
 module.exports = { initGoogleSheets, appendOrder, appendEnquiry };

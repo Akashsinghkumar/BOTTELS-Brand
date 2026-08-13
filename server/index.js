@@ -2,11 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
-// Load environment variables from .env when present
 require('dotenv').config();
-const connectDB = require('./database/db');
-const Order = require('./models/Order');
-const Enquiry = require('./models/Enquiry');
+
+const db = require('./database/db_client');
 const { initGoogleSheets, appendOrder, appendEnquiry } = require('./services/googleSheets');
 
 const app = express();
@@ -17,8 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Database & Services
-connectDB();
+// Initialize Services
 initGoogleSheets();
 
 // Mount New Modular API Router
@@ -34,10 +31,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Legacy Routes (Backwards Compatibility)
 app.post('/api/order', async (req, res) => {
     try {
-        const newOrder = new Order(req.body);
-        await newOrder.save();
+        const newOrder = await db.orders.create(req.body);
         await appendOrder(req.body); // Sync to Sheets
-        res.status(201).json({ success: true, message: 'Order placed successfully' });
+        res.status(201).json({ success: true, message: 'Order placed successfully', order: newOrder });
     } catch (error) {
         console.error('Order Error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -46,10 +42,9 @@ app.post('/api/order', async (req, res) => {
 
 app.post('/api/enquiry', async (req, res) => {
     try {
-        const newEnquiry = new Enquiry(req.body);
-        await newEnquiry.save();
+        const newEnquiry = await db.enquiries.create(req.body);
         await appendEnquiry(req.body); // Sync to Sheets
-        res.status(201).json({ success: true, message: 'Enquiry received' });
+        res.status(201).json({ success: true, message: 'Enquiry received', enquiry: newEnquiry });
     } catch (error) {
         console.error('Enquiry Error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -59,7 +54,7 @@ app.post('/api/enquiry', async (req, res) => {
 // Admin Routes (Legacy Compatibility)
 app.get('/api/admin/orders', async (req, res) => {
     try {
-        const orders = await Order.find().sort({ createdAt: -1 });
+        const orders = await db.orders.find();
         res.json(orders);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch orders' });
@@ -68,7 +63,7 @@ app.get('/api/admin/orders', async (req, res) => {
 
 app.get('/api/admin/enquiries', async (req, res) => {
     try {
-        const enquiries = await Enquiry.find().sort({ createdAt: -1 });
+        const enquiries = await db.enquiries.find();
         res.json(enquiries);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch enquiries' });
@@ -85,11 +80,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Export app for serverless / Vercel compatibility
+// Export app for Cloudflare Workers / Serverless compatibility
 module.exports = app;
 
-// Only listen if not running in Vercel environment
-if (!process.env.VERCEL) {
+// Only listen if executed directly
+if (require.main === module || !process.env.CF_PAGES) {
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
         console.log(`Dashboard client served on http://localhost:${PORT}/dashboard`);

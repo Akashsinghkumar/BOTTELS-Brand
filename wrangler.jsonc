@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bottels-app",
+  "main": "index.js",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bottels-db",
+      "database_id": "YOUR_CLOUDFLARE_D1_DATABASE_ID"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

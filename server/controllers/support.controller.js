@@ -22,7 +22,11 @@ const sendTicketMessage = async (req, res) => {
         if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
 
         const updatedMessages = [...ticket.messages, { sender, text, timestamp: new Date() }];
-        await db.supportTickets.updateOne({ _id: ticketId }, { $set: { messages: updatedMessages } });
+        let updateFields = { messages: updatedMessages };
+        if (sender === 'support') {
+            updateFields.status = 'Open';
+        }
+        await db.supportTickets.updateOne({ _id: ticketId }, { $set: updateFields });
 
         let botReply = null;
 
@@ -47,6 +51,7 @@ const sendTicketMessage = async (req, res) => {
                 botText = "To request a Private Label branding quote, select the 'Private Label' option during checkout or message our sales team on WhatsApp directly!";
             } else if (query.includes('agent') || query.includes('human') || query.includes('talk') || query.includes('connect')) {
                 botText = "Connecting you to a live agent. Average wait: 2 minutes.";
+                await db.supportTickets.updateOne({ _id: ticketId }, { $set: { status: 'Waiting' } });
             } else if (query.includes('whatsapp') || query.includes('number') || query.includes('contact')) {
                 botText = "You can chat with our support team on WhatsApp directly here: https://wa.me/917739339852";
             }

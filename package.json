@@ -1,15 +1,23 @@
 {
   "name": "bottels",
   "version": "1.0.0",
-  "description": "",
+  "description": "AQUAVIORA Packaged Water E-Commerce Platform - Cloudflare Deployment",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node server/tests/verify.js",
     "build": "cd client && npm install && npm run build && cd ..",
     "start": "node index.js",
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "deploy": "npx wrangler deploy",
+    "pages:deploy": "npx wrangler pages deploy public",
+    "d1:init": "npx wrangler d1 execute bottels-db --file=./schema.sql"
   },
-  "keywords": [],
+  "keywords": [
+    "cloudflare",
+    "d1",
+    "aquaviora",
+    "bottels"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -18,7 +26,9 @@
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "googleapis": "^170.1.0",
-    "mongoose": "^9.1.5"
+    "googleapis": "^170.1.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.114.0"
   }
 }
